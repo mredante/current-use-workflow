@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donated Property Tax Enrollment Decision Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1a3a2a;
+    --pine: #2d5a40;
+    --sage: #4a7c5f;
+    --moss: #7aab8a;
+    --mist: #c8ddd0;
+    --paper: #f4f0e8;
+    --cream: #faf7f2;
+    --bark: #6b4e35;
+    --amber: #c47e2b;
+    --warning: #b84040;
+    --warning-light: #fdf0f0;
+    --sky: #3a6b8a;
+    --sky-light: #eef4f8;
+    --text: #1e2a22;
+    --text-light: #4a5c50;
+    --border: #c0d4c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 15% 20%, rgba(74,124,95,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, rgba(26,58,42,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid var(--mist);
+  }
+
+  .header-tag {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    color: var(--forest);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-light);
+    font-weight: 300;
+  }
+
+  /* State sections */
+  .state-block {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(26,58,42,0.06);
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .state-block:nth-child(1) { animation-delay: 0.05s; }
+  .state-block:nth-child(2) { animation-delay: 0.1s; }
+  .state-block:nth-child(3) { animation-delay: 0.15s; }
+  .state-block:nth-child(4) { animation-delay: 0.2s; }
+
+  .state-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: var(--forest);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .state-header:hover { background: var(--pine); }
+
+  .state-abbr {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--moss);
+    min-width: 48px;
+  }
+
+  .state-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    flex: 1;
+  }
+
+  .state-program {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+    background: rgba(255,255,255,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .toggle-icon {
+    color: var(--moss);
+    font-size: 20px;
+    transition: transform 0.3s;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .state-block.open .toggle-icon { transform: rotate(180deg); }
+
+  .state-content {
+    display: none;
+    padding: 24px;
+  }
+
+  .state-block.open .state-content { display: block; }
+
+  /* Decision tree */
+  .question-node {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sage);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+
+  .question-label {
+    font-size: 11px;
+    font-family: 'Source Code Pro', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sage);
+    margin-bottom: 5px;
+  }
+
+  .question-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--forest);
+  }
+
+  .branches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .branches { grid-template-columns: 1fr; }
+  }
+
+  .branch {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .branch-label {
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .branch-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .branch.yes .branch-label {
+    background: #e8f2ec;
+    color: #2d5a40;
+    border-bottom: 1px solid #c0d8c8;
+  }
+
+  .branch.yes .branch-label::before { background: #4a7c5f; }
+
+  .branch.no .branch-label {
+    background: #f0f4f8;
+    color: #3a5570;
+    border-bottom: 1px solid #c8d8e4;
+  }
+
+  .branch.no .branch-label::before { background: #5a85a8; }
+
+  .branch-body {
+    padding: 14px;
+    background: white;
+  }
+
+  /* Action items */
+  .action-item {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .action-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .action-item:first-child { padding-top: 0; }
+
+  .action-icon {
+    font-size: 15px;
+    min-width: 20px;
+    margin-top: 1px;
+  }
+
+  /* Warning box */
+  .warning-box {
+    background: var(--warning-light);
+    border: 1px solid #f0c0c0;
+    border-left: 4px solid var(--warning);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #7a2020;
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Info box */
+  .info-box {
+    background: var(--sky-light);
+    border: 1px solid #c0d8ea;
+    border-left: 4px solid var(--sky);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #1e3a50;
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+  }
+
+  .note-icon { font-size: 16px; min-width: 20px; }
+
+  /* Deadline badge */
+  .deadline {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff3e0;
+    color: #8a4a00;
+    border: 1px solid #f0c87a;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Source Code Pro', monospace;
+    padding: 2px 9px;
+    margin: 4px 0 2px;
+  }
+
+  /* Single path (no branching needed) */
+  .single-path {
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .single-path-label {
+    background: #e8f2ec;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d5a40;
+    border-bottom: 1px solid #c0d8c8;
+  }
+
+  .single-path-body {
+    background: white;
+    padding: 14px;
+  }
+
+  strong { font-weight: 600; }
+
+  .divider {
+    height: 1px;
+    background: var(--mist);
+    margin: 20px 0;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 48px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-tag">NEFF · Stewardship</div>
+    <h1>Donated Property Tax Enrollment</h1>
+    <p class="subtitle">Post-Transfer Action Guide by State</p>
+  </header>
+
+  <!-- VERMONT -->
+  <div class="state-block open" id="vt">
+    <div class="state-header" onclick="toggleState('vt')">
+      <div class="state-abbr">VT</div>
+      <div class="state-name">Vermont</div>
+      <div class="state-program">Current Use (VCU)</div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="state-content">
+      <div class="question-node">
+        <div class="question-label">Decision Point</div>
+        <div class="question-text">Is the property currently enrolled in VCU (Vermont Current Use)?</div>
+      </div>
+
+      <div class="branches">
+        <!-- YES -->
+        <div class="branch yes">
+          <div class="branch-label">Yes — Already Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">📋</span>
+              <div><strong>VCU Transfer Update required</strong> within 30 days of deed transfer.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🌲</span>
+              <div>Requires a <strong>licensed VT forester</strong> — contact them before closing so paperwork is ready.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🔄</span>
+              <div>Update every <strong>10 years</strong> in tandem with an updated VCU Forest Management Plan.</div>
+            </div>
+            <div class="deadline">⏱ 30-day deadline from deed transfer</div>
+            <div class="warning-box">
+              <span class="note-icon">⚠️</span>
+              <div><strong>High stakes:</strong> Vermont's taxable rate outside of VCU is very high. Missing the 30-day window can result in significant financial consequences. Do not delay.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NO -->
+        <div class="branch no">
+          <div class="branch-label">No — Not Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">📝</span>
+              <div><strong>VCU enrollment required</strong> by <strong>September 1</strong> of the year prior to the tax year for which you are applying.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🌲</span>
+              <div>Requires a <strong>licensed VT forester</strong> — contact them before closing so they can prepare materials.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">⚡</span>
+              <div>Get this done <strong>as soon as possible</strong> — do not wait until the deadline.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🔄</span>
+              <div>Update every <strong>10 years</strong> in tandem with an updated VCU Forest Management Plan.</div>
+            </div>
+            <div class="deadline">📅 Sept 1 of prior tax year</div>
+            <div class="warning-box">
+              <span class="note-icon">⚠️</span>
+              <div><strong>High stakes:</strong> Vermont's taxable rate outside of VCU is very high. Missing the enrollment deadline means waiting a full year to gain the tax benefit.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW HAMPSHIRE -->
+  <div class="state-block" id="nh">
+    <div class="state-header" onclick="toggleState('nh')">
+      <div class="state-abbr">NH</div>
+      <div class="state-name">New Hampshire</div>
+      <div class="state-program">Current Use (CU)</div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="state-content">
+      <div class="question-node">
+        <div class="question-label">Decision Point</div>
+        <div class="question-text">Is the property currently enrolled in Current Use (CU)?</div>
+      </div>
+
+      <div class="branches">
+        <!-- YES -->
+        <div class="branch yes">
+          <div class="branch-label">Yes — Already Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">✅</span>
+              <div><strong>No action required.</strong> NEFF will receive the new tax bill automatically.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">📄</span>
+              <div>The town does not require any documentation or copy of the Forest Management Plan.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">♾️</span>
+              <div>Once enrolled, <strong>no ongoing action is required</strong> — no 10-year updates needed.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NO -->
+        <div class="branch no">
+          <div class="branch-label">No — Not Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">👥</span>
+              <div>NEFF stewardship staff can enroll as <strong>"Unmanaged"</strong> — <em>no forester required.</em></div>
+            </div>
+            <div class="divider"></div>
+            <div class="action-item">
+              <span class="action-icon">📈</span>
+              <div>When cost-share funding is secured for a Forest Management Plan, the property can be upgraded to <strong>"Managed"</strong> CU for a small additional savings.</div>
+            </div>
+            <div class="info-box">
+              <span class="note-icon">ℹ️</span>
+              <div>The savings from "Managed" vs "Unmanaged" is small — <strong>not critical if missed.</strong></div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">📋</span>
+              <div>If applying at the <strong>"Managed" rate</strong>, the town requires a Forest Management Plan at submission only. <em>No updates required every 10 years</em> — only at the year of original submission.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAINE -->
+  <div class="state-block" id="me">
+    <div class="state-header" onclick="toggleState('me')">
+      <div class="state-abbr">ME</div>
+      <div class="state-name">Maine</div>
+      <div class="state-program">Tree Growth</div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="state-content">
+      <div class="question-node">
+        <div class="question-label">Decision Point</div>
+        <div class="question-text">Is the property currently enrolled in the Maine Tree Growth Tax Program?</div>
+      </div>
+
+      <div class="branches">
+        <!-- YES -->
+        <div class="branch yes">
+          <div class="branch-label">Yes — Already Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">📋</span>
+              <div><strong>Submit transfer paperwork</strong> within 12 months of deed transfer.</div>
+            </div>
+            <div class="action-item">
+              <span class="action-icon">🌲</span>
+              <div>Must be completed by a <strong>licensed forester.</strong></div>
+            </div>
+            <div class="deadline">⏱ 12-month deadline from deed transfer</div>
+          </div>
+        </div>
+
+        <!-- NO -->
+        <div class="branch no">
+          <div class="branch-label">No — Not Enrolled</div>
+          <div class="branch-body">
+            <div class="action-item">
+              <span class="action-icon">📝</span>
+              <div><strong>Enroll in Tree Growth</strong> before <strong>April 15th.</strong></div>
+            </div>
+            <div class="deadline">📅 April 15 enrollment deadline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MASSACHUSETTS -->
+  <div class="state-block" id="ma">
+    <div class="state-header" onclick="toggleState('ma')">
+      <div class="state-abbr">MA</div>
+      <div class="state-name">Massachusetts</div>
+      <div class="state-program">PTIF Properties</div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="state-content">
+      <div class="single-path">
+        <div class="single-path-label">Applicability Note</div>
+        <div class="single-path-body">
+          <div class="action-item">
+            <span class="action-icon">ℹ️</span>
+            <div>Massachusetts tax enrollment is only relevant for <strong>PTIF (Private Timberland Investment Fund) properties</strong>, of which there are very few in NEFF's portfolio.</div>
+          </div>
+          <div class="info-box" style="margin-top: 8px;">
+            <span class="note-icon">📌</span>
+            <div>Consult with stewardship staff or legal counsel on a case-by-case basis for any MA PTIF properties received through donation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>For internal NEFF stewardship staff use · Always verify current state program requirements with a licensed forester</footer>
+</div>
+
+<script>
+  function toggleState(id) {
+    const block = document.getElementById(id);
+    block.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
