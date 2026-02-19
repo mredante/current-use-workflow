@@ -34,7 +34,6 @@
     min-height: 100vh;
   }
 
-  /* Background texture */
   body::before {
     content: '';
     position: fixed;
@@ -84,7 +83,6 @@
     font-weight: 300;
   }
 
-  /* State sections */
   .state-block {
     background: white;
     border: 1px solid var(--border);
@@ -160,7 +158,6 @@
 
   .state-block.open .state-content { display: block; }
 
-  /* Decision tree */
   .question-node {
     background: var(--paper);
     border: 1px solid var(--border);
@@ -242,7 +239,6 @@
     background: white;
   }
 
-  /* Action items */
   .action-item {
     display: flex;
     gap: 10px;
@@ -262,7 +258,6 @@
     margin-top: 1px;
   }
 
-  /* Warning box */
   .warning-box {
     background: var(--warning-light);
     border: 1px solid #f0c0c0;
@@ -277,7 +272,6 @@
     gap: 8px;
   }
 
-  /* Info box */
   .info-box {
     background: var(--sky-light);
     border: 1px solid #c0d8ea;
@@ -294,7 +288,6 @@
 
   .note-icon { font-size: 16px; min-width: 20px; }
 
-  /* Deadline badge */
   .deadline {
     display: inline-flex;
     align-items: center;
@@ -310,7 +303,6 @@
     margin: 4px 0 2px;
   }
 
-  /* Single path (no branching needed) */
   .single-path {
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -381,7 +373,7 @@
             </div>
             <div class="action-item">
               <span class="action-icon">🌲</span>
-              <div>Requires a <strong>licensed VT forester</strong> — contact them before closing so paperwork is ready.</div>
+              <div>Requires a <strong>licensed VT forester</strong> — <strong>contact them before closing</strong> so paperwork is planned for and ready to file immediately after transfer.</div>
             </div>
             <div class="action-item">
               <span class="action-icon">🔄</span>
@@ -405,7 +397,7 @@
             </div>
             <div class="action-item">
               <span class="action-icon">🌲</span>
-              <div>Requires a <strong>licensed VT forester</strong> — contact them before closing so they can prepare materials.</div>
+              <div>Requires a <strong>licensed VT forester</strong> — <strong>contact them before closing</strong> so enrollment is planned well in advance and materials are ready to go.</div>
             </div>
             <div class="action-item">
               <span class="action-icon">⚡</span>
@@ -465,8 +457,8 @@
           <div class="branch-label">No — Not Enrolled</div>
           <div class="branch-body">
             <div class="action-item">
-              <span class="action-icon">👥</span>
-              <div>NEFF stewardship staff can enroll as <strong>"Unmanaged"</strong> — <em>no forester required.</em></div>
+              <span class="action-icon">✅</span>
+              <div><strong>NH is the easiest state for tax enrollment.</strong> NEFF stewardship staff can enroll directly as <strong>"Unmanaged"</strong> — <strong>no forester required, no FMP required.</strong> Staff handles this entirely in-house.</div>
             </div>
             <div class="divider"></div>
             <div class="action-item">
@@ -479,7 +471,7 @@
             </div>
             <div class="action-item">
               <span class="action-icon">📋</span>
-              <div>If applying at the <strong>"Managed" rate</strong>, the town requires a Forest Management Plan at submission only. <em>No updates required every 10 years</em> — only at the year of original submission.</div>
+              <div>If applying at the <strong>"Managed" rate</strong>, both the application and Forest Management Plan <strong>must be completed by a licensed forester.</strong> The town requires the FMP at submission only — <em>no updates required every 10 years.</em></div>
             </div>
           </div>
         </div>
@@ -526,6 +518,10 @@
               <span class="action-icon">📝</span>
               <div><strong>Enroll in Tree Growth</strong> before <strong>April 15th.</strong></div>
             </div>
+            <div class="action-item">
+              <span class="action-icon">🌲</span>
+              <div>Enrollment <strong>requires a licensed forester</strong> — contact one promptly to ensure the deadline can be met.</div>
+            </div>
             <div class="deadline">📅 April 15 enrollment deadline</div>
           </div>
         </div>
@@ -543,15 +539,23 @@
     </div>
     <div class="state-content">
       <div class="single-path">
-        <div class="single-path-label">Applicability Note</div>
+        <div class="single-path-label">Applicability Note — PTIF Properties Only</div>
         <div class="single-path-body">
           <div class="action-item">
             <span class="action-icon">ℹ️</span>
             <div>Massachusetts tax enrollment is only relevant for <strong>PTIF (Private Timberland Investment Fund) properties</strong>, of which there are very few in NEFF's portfolio.</div>
           </div>
-          <div class="info-box" style="margin-top: 8px;">
-            <span class="note-icon">📌</span>
-            <div>Consult with stewardship staff or legal counsel on a case-by-case basis for any MA PTIF properties received through donation.</div>
+          <div class="action-item">
+            <span class="action-icon">📋</span>
+            <div>A new <strong>Chapter 61 Forest Management Plan</strong> must be completed upon transfer.</div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🌲</span>
+            <div>Requires a <strong>licensed forester</strong> — <strong>give them a heads up before closing</strong> so the plan can be prepared in advance.</div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🔄</span>
+            <div>Ch. 61 plan must be <strong>updated every 10 years.</strong></div>
           </div>
         </div>
       </div>
